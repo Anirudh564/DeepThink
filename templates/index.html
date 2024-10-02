@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Teaching Assistant Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            left: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #444; /* Color for the title */
+            background-color: #f7f7f7; /* Match the background color */
+            padding: 10px 0; /* Padding around the title */
+            z-index: 1000; /* Ensure the title is above other elements */
+            width: 100%; /* Set the width to 100% */
+        }
+        .messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: white;
+            margin-top: 50px; /* Space for the fixed header */
+        }
+        .message {
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 100%; /* Limit message width */
+            word-wrap: break-word; /* Break long words */
+        }
+        .message.user {
+            background-color: #87CEEB     ; /* Darker color for user messages */
+            text-align: left;
+            margin-left: auto; /* Align user messages to the right */
+        }
+        .message.bot {
+            background-color: #bcd9e6; /* Darker color for bot messages */
+            text-align: left;
+            margin-right: auto; /* Align bot messages to the left */
+        }
+        .label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .send-button {
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        .send-button:hover {
+            background-color: #45a049; /* Darker green */
+        }
+    </style>
+</head>
+<body>
+    <div class="header" style="color:DodgerBlue">DeepThink.ai</div> <!-- Fixed title -->
+    <div class="chat-container">
+        <div class="messages" id="messages"></div>
+        <div style="display: flex; align-items: center; ">
+            <input type="text" id="userInput" placeholder="Ask something about Sorting algorithms..." onkeypress="checkEnter(event)">
+            <button class="send-button" onclick="sendMessage()">&#10148;</button> <!-- Arrow icon -->
+        </div>
+    </div>
+
+    <script>
+        function displayMessage(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + sender;
+
+            // Create a label for the sender
+            const label = document.createElement('div');
+            label.className = 'label';
+            label.textContent = sender === 'user' ? 'You' : 'Agent'; // Set label based on sender
+
+            // Append label and message to messageDiv
+            messageDiv.appendChild(label);
+            messageDiv.appendChild(document.createTextNode(message));
+
+            document.getElementById('messages').appendChild(messageDiv);
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        }
+
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput').value;
+            if (userInput.trim() === '') return;
+
+            displayMessage(userInput, 'user');
+            document.getElementById('userInput').value = '';
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: userInput }),
+                });
+                const data = await response.json();
+                displayMessage(data.response, 'bot');
+            } catch (error) {
+                displayMessage('Error: Unable to get response from server', 'bot');
+            }
+        }
+
+        function checkEnter(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
