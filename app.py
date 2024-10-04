@@ -5,7 +5,8 @@ import google.generativeai as genai
 app = Flask(__name__)
 
 # Configure the API key
-os.environ['GEMINI_API_KEY'] = "AIzaSyDRglRnuYxpJuIRYAscLiGTjY5iFHd4rfs"
+os.environ['GEMINI_API_KEY'] = os.getenv("GEMINI_API_KEY")
+
 genai.configure(api_key=os.environ['GEMINI_API_KEY'])
 
 # Create the model (as per your original code)
@@ -39,5 +40,5 @@ def chat():
     response = chat_session.send_message(user_message)
     return jsonify({"response": response.text})
 
-if __name__ == "_main_":
-    app.run(debug=True, port=5003)
+if __name__ == "__main__":
+    app.run(debug=True, port=int(os.environ.get("PORT", 5000)))
